@@ -5,6 +5,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import config.Configuration;
 import jakarta.annotation.PreDestroy;
 import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import lombok.extern.log4j.Log4j2;
 
 import javax.sql.DataSource;
@@ -12,16 +13,19 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 @Log4j2
+@Singleton
 public class DBConnectionPool {
     private final Configuration configuration;
-    private final DataSource hikariDataSource;
+    private DataSource hikariDataSource;
 
     @Inject
     private DBConnectionPool(Configuration configuration){
         this.configuration = configuration;
-        hikariDataSource = getHikariPool();
     }
 
+    public void loadPool(){
+        hikariDataSource = getHikariPool();
+    }
     private DataSource getHikariPool(){
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setJdbcUrl(configuration.getPropertyXML(SqlQueries.URL));
