@@ -1,27 +1,26 @@
 package domain.modelo.restaurant;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class RestaurantOrder {
     private int id;
     private int tableNumber;
     private int idCustomer;
     private LocalDateTime date;
-    private List<OrderItem> orderItems;
 
-    public RestaurantOrder(int tableNumber, int idCustomer, LocalDateTime date, List<OrderItem> orderItems) {
+    public RestaurantOrder(int tableNumber, int idCustomer, LocalDateTime date) {
         this.tableNumber = tableNumber;
         this.idCustomer = idCustomer;
         this.date = date;
-        this.orderItems = orderItems;
     }
 
     public RestaurantOrder(String line) {

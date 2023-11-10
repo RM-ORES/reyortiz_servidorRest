@@ -1,5 +1,6 @@
 package config;
 
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.log4j.Log4j2;
 

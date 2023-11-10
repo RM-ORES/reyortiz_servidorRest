@@ -162,7 +162,7 @@ public class RestaurantOrderDAOImpl implements RestaurantOrderDAO {
                 int idcustomer = resultSet.getInt(SqlQueries.IDCUSTOMER);
                 LocalDateTime date = LocalDateTime.ofInstant(resultSet.getTimestamp(SqlQueries.TIME_STAMP).toInstant(), ZoneId.systemDefault());
 
-                list.add(new RestaurantOrder(id, tableNumber, idcustomer, date, null));
+                list.add(new RestaurantOrder(id, tableNumber, idcustomer, date));
             }
         return list;
     }
