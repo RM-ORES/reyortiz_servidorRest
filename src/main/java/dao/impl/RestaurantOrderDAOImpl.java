@@ -5,6 +5,8 @@ import dao.common.Constantes;
 import dao.common.DBConnectionPool;
 import dao.common.SqlQueries;
 import domain.modelo.errores.DataBaseDownException;
+import domain.modelo.errores.IdNotFoundException;
+import domain.modelo.errores.RollbackException;
 import domain.modelo.errores.WrongStatementException;
 import domain.modelo.restaurant.RestaurantOrder;
 
@@ -63,7 +65,11 @@ public class RestaurantOrderDAOImpl implements RestaurantOrderDAO {
                    either = read.get(0);
                }
            } catch (SQLException e) {
-               throw new WrongStatementException(e.getMessage());
+               if (e.getErrorCode() == 1054){
+                   throw new IdNotFoundException(e.getMessage());
+               } else {
+                   throw new WrongStatementException(e.getMessage());
+               }
            }
        } catch (SQLException e) {
            throw new DataBaseDownException(Constantes.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
@@ -75,7 +81,7 @@ public class RestaurantOrderDAOImpl implements RestaurantOrderDAO {
 
     @Override
     public Integer add(RestaurantOrder restaurantOrder) {
-        Integer either = null;
+        int either;
 
         try (Connection connection = dbConnection.getConnection()) {
             try(PreparedStatement preparedStatementOrder = connection.prepareStatement(SqlQueries.ORDERADD, Statement.RETURN_GENERATED_KEYS)){
@@ -85,6 +91,11 @@ public class RestaurantOrderDAOImpl implements RestaurantOrderDAO {
                 preparedStatementOrder.setTimestamp(3, Timestamp.valueOf(restaurantOrder.getDate()));
 
                 either = preparedStatementOrder.executeUpdate();
+                ResultSet rs = preparedStatementOrder.getGeneratedKeys();
+                if (rs.next()) {
+                    int autoId = rs.getInt(1);
+                    restaurantOrder.setId(autoId);
+                }
 
             } catch (SQLException e) {
                 throw new WrongStatementException(e.getMessage());
@@ -99,7 +110,7 @@ public class RestaurantOrderDAOImpl implements RestaurantOrderDAO {
 
     @Override
     public Integer update(RestaurantOrder restaurantOrder) {
-        Integer either = null;
+        Integer either;
         try(Connection connection = dbConnection.getConnection()){
             try (PreparedStatement preparedStatement = connection.prepareStatement(SqlQueries.ORDERUPDATE)) {
 
@@ -110,7 +121,11 @@ public class RestaurantOrderDAOImpl implements RestaurantOrderDAO {
                 either = preparedStatement.executeUpdate();
 
             } catch (SQLException e) {
-                throw new WrongStatementException(e.getMessage());
+                if (e.getErrorCode() == 1054){
+                    throw new IdNotFoundException(e.getMessage());
+                } else {
+                    throw new WrongStatementException(e.getMessage());
+                }
             }
         } catch (SQLException e){
             throw new DataBaseDownException(Constantes.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
@@ -121,7 +136,7 @@ public class RestaurantOrderDAOImpl implements RestaurantOrderDAO {
 
     @Override
     public Integer delete(int id) {
-        Integer either = null;
+        Integer result;
         try (Connection connection = dbConnection.getConnection()) {
 
             try (PreparedStatement preparedStatementItem = connection.prepareStatement(SqlQueries.ORDERITEMDELETEBYORDER);
@@ -132,18 +147,21 @@ public class RestaurantOrderDAOImpl implements RestaurantOrderDAO {
 
                 connection.setAutoCommit(false);
                 preparedStatementItem.executeUpdate();
-                int result = preparedStatementOrder.executeUpdate();
+                result = preparedStatementOrder.executeUpdate();
 
                 connection.commit();
-                either = result;
 
             } catch (SQLException e) {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    throw new RuntimeException(ex);
+                    throw new RollbackException(ex.getMessage());
                 }
-                throw new WrongStatementException(e.getMessage());
+                if (e.getErrorCode() == 1054){
+                    throw new IdNotFoundException(e.getMessage());
+                } else {
+                    throw new WrongStatementException(e.getMessage());
+                }
             } finally {
                 connection.setAutoCommit(true);
             }
@@ -151,7 +169,7 @@ public class RestaurantOrderDAOImpl implements RestaurantOrderDAO {
             throw new DataBaseDownException(Constantes.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
         }
 
-        return either;
+        return result;
     }
 
     private List<RestaurantOrder> readRS(ResultSet resultSet) throws SQLException {

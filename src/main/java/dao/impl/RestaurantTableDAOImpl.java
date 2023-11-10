@@ -5,6 +5,8 @@ import dao.common.Constantes;
 import dao.common.DBConnectionPool;
 import dao.common.SqlQueries;
 import domain.modelo.errores.DataBaseDownException;
+import domain.modelo.errores.IdNotFoundException;
+import domain.modelo.errores.RollbackException;
 import domain.modelo.errores.WrongStatementException;
 import domain.modelo.restaurant.RestaurantTable;
 import jakarta.inject.Inject;
@@ -57,7 +59,12 @@ public class RestaurantTableDAOImpl implements RestaurantTableDAO {
                     table = read.get(0);
                 }
             } catch (SQLException e) {
-                throw new WrongStatementException(e.getMessage());
+//                if (e.getErrorCode() == 1054){
+//                    throw new IdNotFoundException(e.getMessage());
+//                } else {
+//                    throw new WrongStatementException(e.getMessage());
+//                }
+                throw new IdNotFoundException(e.getMessage());
             }
         } catch (SQLException e){
             throw new DataBaseDownException(Constantes.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
@@ -67,13 +74,17 @@ public class RestaurantTableDAOImpl implements RestaurantTableDAO {
 
     @Override
     public int add(RestaurantTable restaurantTable) {
-        int add = 0;
+        int add;
         try(Connection connection = dbConnection.getConnection()){
             try(PreparedStatement preparedStatement = connection.prepareStatement(SqlQueries.TABLEADD, Statement.RETURN_GENERATED_KEYS)){
 
-                preparedStatement.setInt(1, restaurantTable.getTableNumber());
                 preparedStatement.setInt(1, restaurantTable.getSeats());
                 add = preparedStatement.executeUpdate();
+                ResultSet rs = preparedStatement.getGeneratedKeys();
+                if (rs.next()) {
+                    int autoId = rs.getInt(1);
+                    restaurantTable.setTableNumber(autoId);
+                }
 
             } catch (SQLException e) {
                 throw new WrongStatementException(e.getMessage());
@@ -86,15 +97,20 @@ public class RestaurantTableDAOImpl implements RestaurantTableDAO {
 
     @Override
     public int update(RestaurantTable restaurantTable) {
-        int update = 0;
+        int update;
         try(Connection connection = dbConnection.getConnection()){
-            try (PreparedStatement preparedStatement = connection.prepareStatement(SqlQueries.ORDERUPDATE)) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(SqlQueries.TABLEUPDATE)) {
 
                 preparedStatement.setInt(1, restaurantTable.getSeats());
+                preparedStatement.setInt(2, restaurantTable.getTableNumber());
                 update = preparedStatement.executeUpdate();
 
             } catch (SQLException e) {
-                throw new WrongStatementException(e.getMessage());
+                if (e.getErrorCode() == 1054){
+                    throw new IdNotFoundException(e.getMessage());
+                } else {
+                    throw new WrongStatementException(e.getMessage());
+                }
             }
         } catch (SQLException e){
             throw new DataBaseDownException(Constantes.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
@@ -123,9 +139,13 @@ public class RestaurantTableDAOImpl implements RestaurantTableDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    throw new RuntimeException(ex);
+                    throw new RollbackException(ex.getMessage());
                 }
-                throw new WrongStatementException(e.getMessage());
+                if (e.getErrorCode() == 1054){
+                    throw new IdNotFoundException(e.getMessage());
+                } else {
+                    throw new WrongStatementException(e.getMessage());
+                }
             } finally {
                 connection.setAutoCommit(true);
             }

@@ -3,6 +3,7 @@ package dao.common;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import config.Configuration;
+import domain.modelo.errores.DataBaseDownException;
 import jakarta.annotation.PreDestroy;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -16,16 +17,14 @@ import java.sql.SQLException;
 @Singleton
 public class DBConnectionPool {
     private final Configuration configuration;
-    private DataSource hikariDataSource;
+    private final DataSource hikariDataSource;
 
     @Inject
     private DBConnectionPool(Configuration configuration){
         this.configuration = configuration;
+        this.hikariDataSource = getHikariPool();
     }
 
-    public void loadPool(){
-        hikariDataSource = getHikariPool();
-    }
     private DataSource getHikariPool(){
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setJdbcUrl(configuration.getPropertyXML(SqlQueries.URL));
@@ -42,16 +41,13 @@ public class DBConnectionPool {
 
     }
 
-    public DataSource getDataSource(){
-        return hikariDataSource;
-    }
-
     public Connection getConnection(){
-        Connection connection = null;
+        Connection connection;
         try{
             connection = hikariDataSource.getConnection();
         } catch (SQLException e) {
             log.error(e.getMessage());
+            throw new DataBaseDownException(Constantes.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
         }
         return connection;
     }

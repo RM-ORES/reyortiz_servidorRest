@@ -1,9 +1,11 @@
 package jakarta.rest;
 
+import domain.modelo.errores.WrongStatementException;
 import domain.modelo.restaurant.RestaurantTable;
 import domain.servicios.RestaurantTableServices;
+import jakarta.errores.WrongStatementExceptionMapper;
 import jakarta.inject.Inject;
-import jakarta.persistence.criteria.CriteriaBuilder;
+
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -28,7 +30,12 @@ public class RestTables {
     @GET
     @Path(Constantes.ID)
     public RestaurantTable get(@PathParam(Constantes.ID_SINGLE) String id){
-        return mesaServicios.get(Integer.parseInt(id));
+        try{
+            int numId  = Integer.parseInt(id);
+            return mesaServicios.get(numId);
+        }catch (NumberFormatException e){
+            throw new WrongStatementException(e.getMessage());
+        }
     }
 
     @POST
@@ -38,7 +45,7 @@ public class RestTables {
     }
 
     @PUT
-    public RestaurantTable update(RestaurantTable table, @QueryParam(Constantes.ID_SINGLE) String id){
+    public RestaurantTable update(RestaurantTable table){
         mesaServicios.update(table);
         return mesaServicios.get(table.getTableNumber());
     }
@@ -46,6 +53,10 @@ public class RestTables {
     @DELETE
     @Path(Constantes.ID)
     public Response delete(@PathParam(Constantes.ID_SINGLE) String id){
-        return null;
+        if (mesaServicios.delete(Integer.parseInt(id)) == 1){
+            return Response.status(Response.Status.NO_CONTENT).build();
+        } else {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
     }
 }

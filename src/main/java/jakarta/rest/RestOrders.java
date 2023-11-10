@@ -39,7 +39,7 @@ public class RestOrders {
     }
 
     @PUT
-    public RestaurantOrder updatePedido(RestaurantOrder pedido, @QueryParam(Constantes.ID_SINGLE) String id) {
+    public RestaurantOrder updatePedido(RestaurantOrder pedido) {
         serviciosPedidos.update(pedido);
         return serviciosPedidos.get(pedido.getId());
     }
@@ -47,17 +47,12 @@ public class RestOrders {
     @DELETE
     @Path(Constantes.ID)
     public Response deletePedido(@PathParam(Constantes.ID_SINGLE) String id) {
-//        if (serviciosPedidos.delete(Integer.parseInt(id)) == 1){
-//            return Response.status(Response.Status.NO_CONTENT).build();
-//        } else {
-//            return Response.status(Response.Status.NOT_FOUND)
-//                    .entity(ApiError.builder()
-//                            .message("usuario no encontrado")
-//                            .fecha(LocalDateTime.now())
-//                            .build())
-//                    .build();
-//        }
-        return null;
+        if (serviciosPedidos.delete(Integer.parseInt(id)) == 1){
+            return Response.status(Response.Status.NO_CONTENT).build();
+        } else {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
     }
 
 }
