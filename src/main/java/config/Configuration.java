@@ -10,7 +10,7 @@ import java.util.Properties;
 @Log4j2
 @Singleton
 public class Configuration {
-    private static Configuration instance = null;
+    private static Configuration instance;
     private Properties propertiesxml;
 
     private Configuration() {
