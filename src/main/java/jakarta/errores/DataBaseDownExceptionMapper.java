@@ -4,9 +4,11 @@ import domain.modelo.errores.DataBaseDownException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.Provider;
 
 import java.time.LocalDateTime;
 
+@Provider
 public class DataBaseDownExceptionMapper implements ExceptionMapper<DataBaseDownException> {
     @Override
     public Response toResponse(DataBaseDownException exception) {

@@ -4,10 +4,7 @@ import dao.RestaurantOrderDAO;
 import dao.common.Constantes;
 import dao.common.DBConnectionPool;
 import dao.common.SqlQueries;
-import domain.modelo.errores.DataBaseDownException;
-import domain.modelo.errores.IdNotFoundException;
-import domain.modelo.errores.RollbackException;
-import domain.modelo.errores.WrongStatementException;
+import domain.modelo.errores.*;
 import domain.modelo.restaurant.RestaurantOrder;
 
 import jakarta.inject.Inject;
@@ -35,103 +32,129 @@ public class RestaurantOrderDAOImpl implements RestaurantOrderDAO {
 
     @Override
     public List<RestaurantOrder> getAll() {
-        List<RestaurantOrder> either = null;
-        try (Connection connection = dbConnection.getConnection()){
+        List<RestaurantOrder> result;
+        try (Connection connection = dbConnection.getConnection()) {
             try (Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
                 ResultSet resultSet = statement.executeQuery(SqlQueries.ORDERGETALL);
                 List<RestaurantOrder> read = readRS(resultSet);
+
                 if (!read.isEmpty()) {
-                    either = read;
+                    result = read;
+                } else {
+                    throw new NotFoundException(Constantes.NOT_FOUND);
                 }
             } catch (SQLException e) {
+                log.error(e.getMessage(), e);
                 throw new WrongStatementException(e.getMessage());
             }
         } catch (SQLException e) {
+            log.error(e.getMessage(), e);
             throw new DataBaseDownException(Constantes.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
         }
-        return either;
+        return result;
+    }
+    @Override
+    public List<RestaurantOrder> getByTable(int tableId){
+        List<RestaurantOrder> result;
+        try (Connection connection = dbConnection.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(SqlQueries.ORDERGETBYTABLE)) {
+                preparedStatement.setInt(1, tableId);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                List<RestaurantOrder> read = readRS(resultSet);
+
+                if (!read.isEmpty()) {
+                    result = read;
+                } else {
+                    throw new NotFoundException(Constantes.NOT_FOUND);
+                }
+            } catch (SQLException e) {
+                log.error(e.getMessage(), e);
+                throw new WrongStatementException(e.getMessage());
+            }
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            throw new DataBaseDownException(Constantes.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
+        }
+
+        return result;
     }
 
     @Override
     public RestaurantOrder get(int id) {
-       RestaurantOrder either = null;
-       try(Connection connection = dbConnection.getConnection()){
-           try (PreparedStatement preparedStatement = connection.prepareStatement(SqlQueries.ORDERGET)) {
-               preparedStatement.setInt(1, id);
-               ResultSet resultSet = preparedStatement.executeQuery();
+        RestaurantOrder result;
+        try (Connection connection = dbConnection.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(SqlQueries.ORDERGET)) {
+                preparedStatement.setInt(1, id);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                List<RestaurantOrder> read = readRS(resultSet);
 
-               List<RestaurantOrder> read = readRS(resultSet);
-               if (!read.isEmpty()) {
-                   either = read.get(0);
-               }
-           } catch (SQLException e) {
-               if (e.getErrorCode() == 1054){
-                   throw new IdNotFoundException(e.getMessage());
-               } else {
-                   throw new WrongStatementException(e.getMessage());
-               }
-           }
-       } catch (SQLException e) {
-           throw new DataBaseDownException(Constantes.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
-       }
+                if (!read.isEmpty()) {
+                    result = read.get(Constantes.INDEX_0);
+                } else {
+                    throw new NotFoundException(Constantes.NOT_FOUND);
+                }
+            } catch (SQLException e) {
+                log.error(e.getMessage(), e);
+                throw new WrongStatementException(e.getMessage());
+            }
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            throw new DataBaseDownException(Constantes.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
+        }
 
-
-        return either;
+        return result;
     }
 
     @Override
     public Integer add(RestaurantOrder restaurantOrder) {
-        int either;
-
+        int result;
         try (Connection connection = dbConnection.getConnection()) {
-            try(PreparedStatement preparedStatementOrder = connection.prepareStatement(SqlQueries.ORDERADD, Statement.RETURN_GENERATED_KEYS)){
-
+            try (PreparedStatement preparedStatementOrder = connection.prepareStatement(SqlQueries.ORDERADD, Statement.RETURN_GENERATED_KEYS)) {
                 preparedStatementOrder.setInt(1, restaurantOrder.getTableNumber());
                 preparedStatementOrder.setInt(2, restaurantOrder.getIdCustomer());
                 preparedStatementOrder.setTimestamp(3, Timestamp.valueOf(restaurantOrder.getDate()));
 
-                either = preparedStatementOrder.executeUpdate();
+                result = preparedStatementOrder.executeUpdate();
+
                 ResultSet rs = preparedStatementOrder.getGeneratedKeys();
                 if (rs.next()) {
                     int autoId = rs.getInt(1);
                     restaurantOrder.setId(autoId);
                 }
-
             } catch (SQLException e) {
+                log.error(e.getMessage(), e);
                 throw new WrongStatementException(e.getMessage());
             }
         } catch (SQLException e) {
+            log.error(e.getMessage(), e);
             throw new DataBaseDownException(Constantes.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
         }
-
-        return either;
+        return result;
     }
 
 
     @Override
     public Integer update(RestaurantOrder restaurantOrder) {
-        Integer either;
-        try(Connection connection = dbConnection.getConnection()){
+        int result;
+        try (Connection connection = dbConnection.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(SqlQueries.ORDERUPDATE)) {
-
                 preparedStatement.setInt(1, restaurantOrder.getTableNumber());
                 preparedStatement.setInt(2, restaurantOrder.getIdCustomer());
                 preparedStatement.setInt(3, restaurantOrder.getId());
 
-                either = preparedStatement.executeUpdate();
-
-            } catch (SQLException e) {
-                if (e.getErrorCode() == 1054){
-                    throw new IdNotFoundException(e.getMessage());
-                } else {
-                    throw new WrongStatementException(e.getMessage());
+                result = preparedStatement.executeUpdate();
+                if (result != 1) {
+                    throw new NotFoundException(Constantes.NOT_FOUND);
                 }
+            } catch (SQLException e) {
+                log.error(e.getMessage(), e);
+                throw new WrongStatementException(e.getMessage());
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
             throw new DataBaseDownException(Constantes.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
         }
-
-        return either;
+        return result;
     }
 
     @Override
@@ -141,7 +164,6 @@ public class RestaurantOrderDAOImpl implements RestaurantOrderDAO {
 
             try (PreparedStatement preparedStatementItem = connection.prepareStatement(SqlQueries.ORDERITEMDELETEBYORDER);
                  PreparedStatement preparedStatementOrder = connection.prepareStatement(SqlQueries.ORDERDELETE)) {
-
                 preparedStatementItem.setInt(1, id);
                 preparedStatementOrder.setInt(1, id);
 
@@ -149,39 +171,39 @@ public class RestaurantOrderDAOImpl implements RestaurantOrderDAO {
                 preparedStatementItem.executeUpdate();
                 result = preparedStatementOrder.executeUpdate();
 
+                if (result != 1) {
+                    throw new NotFoundException(Constantes.NOT_FOUND);
+                }
                 connection.commit();
 
             } catch (SQLException e) {
+                log.error(e.getMessage(), e);
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
                     throw new RollbackException(ex.getMessage());
                 }
-                if (e.getErrorCode() == 1054){
-                    throw new IdNotFoundException(e.getMessage());
-                } else {
-                    throw new WrongStatementException(e.getMessage());
-                }
+                throw new WrongStatementException(e.getMessage());
             } finally {
                 connection.setAutoCommit(true);
             }
         } catch (SQLException e) {
+            log.error(e.getMessage(), e);
             throw new DataBaseDownException(Constantes.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
         }
-
         return result;
     }
 
     private List<RestaurantOrder> readRS(ResultSet resultSet) throws SQLException {
         List<RestaurantOrder> list = new ArrayList<>();
-            while (resultSet.next()) {
-                int id = resultSet.getInt(SqlQueries.IDORDER);
-                int tableNumber = resultSet.getInt(SqlQueries.TABLE_NUMBER);
-                int idcustomer = resultSet.getInt(SqlQueries.IDCUSTOMER);
-                LocalDateTime date = LocalDateTime.ofInstant(resultSet.getTimestamp(SqlQueries.TIME_STAMP).toInstant(), ZoneId.systemDefault());
+        while (resultSet.next()) {
+            int id = resultSet.getInt(SqlQueries.IDORDER);
+            int tableNumber = resultSet.getInt(SqlQueries.TABLE_NUMBER);
+            int idcustomer = resultSet.getInt(SqlQueries.IDCUSTOMER);
+            LocalDateTime date = LocalDateTime.ofInstant(resultSet.getTimestamp(SqlQueries.TIME_STAMP).toInstant(), ZoneId.systemDefault());
 
-                list.add(new RestaurantOrder(id, tableNumber, idcustomer, date));
-            }
+            list.add(new RestaurantOrder(id, tableNumber, idcustomer, date));
+        }
         return list;
     }
 }

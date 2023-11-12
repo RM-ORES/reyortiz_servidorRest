@@ -22,6 +22,9 @@ public class RestaurantOrderServices {
     public List<RestaurantOrder> getAll() {
         return restaurantOrderDAO.getAll();
     }
+    public List<RestaurantOrder> getByTable(int tableId){
+        return restaurantOrderDAO.getByTable(tableId);
+    }
 
 
 

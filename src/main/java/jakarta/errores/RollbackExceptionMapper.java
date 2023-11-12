@@ -4,9 +4,11 @@ import domain.modelo.errores.RollbackException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.Provider;
 
 import java.time.LocalDateTime;
 
+@Provider
 public class RollbackExceptionMapper implements ExceptionMapper<RollbackException> {
     @Override
     public Response toResponse(RollbackException exception) {

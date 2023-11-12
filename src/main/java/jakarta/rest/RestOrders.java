@@ -1,5 +1,6 @@
 package jakarta.rest;
 
+import domain.modelo.errores.WrongStatementException;
 import domain.modelo.restaurant.RestaurantOrder;
 import domain.servicios.RestaurantOrderServices;
 import jakarta.inject.Inject;
@@ -26,10 +27,22 @@ public class RestOrders {
         return serviciosPedidos.getAll();
     }
 
+//    @GET
+//    public List<RestaurantOrder> getByTable(@QueryParam(Constantes.TABLE_NUMBER) String tableId){
+//        try{
+//            return serviciosPedidos.getByTable(Integer.parseInt(tableId));
+//        }catch (NumberFormatException e){
+//            throw new WrongStatementException(Constantes.EL_ID_DEBE_SER_UN_NUMERO_ENTERO);
+//        }
+//    }
     @GET
     @Path(Constantes.ID)
     public RestaurantOrder getPedido(@PathParam(Constantes.ID_SINGLE) String id) {
-        return serviciosPedidos.get(Integer.parseInt(id));
+        try{
+            return serviciosPedidos.get(Integer.parseInt(id));
+        }catch (NumberFormatException e){
+            throw new WrongStatementException(Constantes.EL_ID_DEBE_SER_UN_NUMERO_ENTERO);
+        }
     }
 
     @POST
@@ -47,12 +60,15 @@ public class RestOrders {
     @DELETE
     @Path(Constantes.ID)
     public Response deletePedido(@PathParam(Constantes.ID_SINGLE) String id) {
-        if (serviciosPedidos.delete(Integer.parseInt(id)) == 1){
-            return Response.status(Response.Status.NO_CONTENT).build();
-        } else {
-            return Response.status(Response.Status.NOT_FOUND).build();
+        try{
+            if (serviciosPedidos.delete(Integer.parseInt(id)) == 1){
+                return Response.status(Response.Status.NO_CONTENT).build();
+            } else {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+        } catch (NumberFormatException e){
+            throw new WrongStatementException(Constantes.EL_ID_DEBE_SER_UN_NUMERO_ENTERO);
         }
-
     }
 
 }

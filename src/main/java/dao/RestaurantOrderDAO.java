@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface RestaurantOrderDAO {
     public List<RestaurantOrder> getAll();
+    public List<RestaurantOrder> getByTable(int tableId);
 
     public RestaurantOrder get(int id);
 

@@ -3,7 +3,6 @@ package jakarta.rest;
 import domain.modelo.errores.WrongStatementException;
 import domain.modelo.restaurant.RestaurantTable;
 import domain.servicios.RestaurantTableServices;
-import jakarta.errores.WrongStatementExceptionMapper;
 import jakarta.inject.Inject;
 
 import jakarta.ws.rs.*;
@@ -34,7 +33,7 @@ public class RestTables {
             int numId  = Integer.parseInt(id);
             return mesaServicios.get(numId);
         }catch (NumberFormatException e){
-            throw new WrongStatementException(e.getMessage());
+            throw new WrongStatementException(Constantes.EL_ID_DEBE_SER_UN_NUMERO_ENTERO);
         }
     }
 
@@ -53,10 +52,15 @@ public class RestTables {
     @DELETE
     @Path(Constantes.ID)
     public Response delete(@PathParam(Constantes.ID_SINGLE) String id){
-        if (mesaServicios.delete(Integer.parseInt(id)) == 1){
-            return Response.status(Response.Status.NO_CONTENT).build();
-        } else {
-            return Response.status(Response.Status.NOT_FOUND).build();
+        try{
+            if (mesaServicios.delete(Integer.parseInt(id)) == 1){
+                return Response.status(Response.Status.NO_CONTENT).build();
+            } else {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+        } catch (NumberFormatException e){
+            throw new WrongStatementException(Constantes.EL_ID_DEBE_SER_UN_NUMERO_ENTERO);
         }
+
     }
 }
