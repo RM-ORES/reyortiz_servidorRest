@@ -27,14 +27,15 @@ public class RestOrders {
         return serviciosPedidos.getAll();
     }
 
-//    @GET
-//    public List<RestaurantOrder> getByTable(@QueryParam(Constantes.TABLE_NUMBER) String tableId){
-//        try{
-//            return serviciosPedidos.getByTable(Integer.parseInt(tableId));
-//        }catch (NumberFormatException e){
-//            throw new WrongStatementException(Constantes.EL_ID_DEBE_SER_UN_NUMERO_ENTERO);
-//        }
-//    }
+    @GET
+    @Path(Constantes.TABLE_NUMBER_PATH)
+    public List<RestaurantOrder> getByTable(@PathParam(Constantes.TABLE_NUMBER) String tableId){
+        try{
+            return serviciosPedidos.getByTable(Integer.parseInt(tableId));
+        }catch (NumberFormatException e){
+            throw new WrongStatementException(Constantes.EL_ID_DEBE_SER_UN_NUMERO_ENTERO);
+        }
+    }
     @GET
     @Path(Constantes.ID)
     public RestaurantOrder getPedido(@PathParam(Constantes.ID_SINGLE) String id) {
