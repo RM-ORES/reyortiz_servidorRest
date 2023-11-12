@@ -6,13 +6,13 @@ import domain.modelo.restaurant.RestaurantTable;
 import java.util.List;
 
 public interface RestaurantTableDAO {
-    public List<RestaurantTable> getAll();
+    List<RestaurantTable> getAll();
 
-    public RestaurantTable get(int id);
+    RestaurantTable get(int id);
 
-    public int add(RestaurantTable restaurantTable);
+    int add(RestaurantTable restaurantTable);
 
-    public int update(RestaurantTable restaurantTable);
+    int update(RestaurantTable restaurantTable);
 
-    public int delete(int id);
+    int delete(int id);
 }

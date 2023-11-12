@@ -2,7 +2,6 @@ package domain.servicios;
 
 
 import dao.RestaurantOrderDAO;
-
 import domain.modelo.restaurant.RestaurantOrder;
 import jakarta.inject.Inject;
 import lombok.extern.log4j.Log4j2;
@@ -22,22 +21,22 @@ public class RestaurantOrderServices {
     public List<RestaurantOrder> getAll() {
         return restaurantOrderDAO.getAll();
     }
-    public List<RestaurantOrder> getByTable(int tableId){
+
+    public List<RestaurantOrder> getByTable(int tableId) {
         return restaurantOrderDAO.getByTable(tableId);
     }
-
 
 
     public RestaurantOrder get(int id) {
         return restaurantOrderDAO.get(id);
     }
 
-    public Integer add(RestaurantOrder restaurantOrder) {
-            return restaurantOrderDAO.add(restaurantOrder);
+    public void add(RestaurantOrder restaurantOrder) {
+        restaurantOrderDAO.add(restaurantOrder);
     }
 
-    public Integer update(RestaurantOrder restaurantOrder) {
-        return restaurantOrderDAO.update(restaurantOrder);
+    public void update(RestaurantOrder restaurantOrder) {
+        restaurantOrderDAO.update(restaurantOrder);
     }
 
     public Integer delete(int id) {

@@ -2,7 +2,8 @@ package dao.common;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import config.Configuration;
+import common.Configuration;
+import common.Utilities;
 import domain.modelo.errores.DataBaseDownException;
 import jakarta.annotation.PreDestroy;
 import jakarta.inject.Inject;
@@ -47,7 +48,7 @@ public class DBConnectionPool {
             connection = hikariDataSource.getConnection();
         } catch (SQLException e) {
             log.error(e.getMessage());
-            throw new DataBaseDownException(Constantes.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
+            throw new DataBaseDownException(Utilities.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
         }
         return connection;
     }

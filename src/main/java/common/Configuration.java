@@ -1,6 +1,5 @@
-package config;
+package common;
 
-import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.log4j.Log4j2;
 
@@ -10,7 +9,6 @@ import java.util.Properties;
 @Log4j2
 @Singleton
 public class Configuration {
-    private static Configuration instance;
     private Properties propertiesxml;
 
     private Configuration() {
@@ -20,13 +18,6 @@ public class Configuration {
         } catch (IOException e) {
             log.error(e.getMessage());
         }
-    }
-
-    public static Configuration getInstance() {
-        if (instance == null) {
-            instance = new Configuration();
-        }
-        return instance;
     }
 
     public String getPropertyXML(String key) {

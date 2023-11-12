@@ -1,7 +1,7 @@
 package dao.impl;
 
 import dao.RestaurantTableDAO;
-import dao.common.Constantes;
+import common.Utilities;
 import dao.common.DBConnectionPool;
 import dao.common.SqlQueries;
 import domain.modelo.errores.DataBaseDownException;
@@ -39,7 +39,7 @@ public class RestaurantTableDAOImpl implements RestaurantTableDAO {
                 if (!read.isEmpty()) {
                     result = read;
                 } else {
-                    throw new NotFoundException(Constantes.NOT_FOUND);
+                    throw new NotFoundException(Utilities.NOT_FOUND);
                 }
             } catch (SQLException e) {
                 log.error(e.getMessage(), e);
@@ -47,7 +47,7 @@ public class RestaurantTableDAOImpl implements RestaurantTableDAO {
             }
         } catch (SQLException e) {
             log.error(e.getMessage(), e);
-            throw new DataBaseDownException(Constantes.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
+            throw new DataBaseDownException(Utilities.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
         }
         return result;
     }
@@ -63,9 +63,9 @@ public class RestaurantTableDAOImpl implements RestaurantTableDAO {
 
                 List<RestaurantTable> read = readRS(resultSet);
                 if (!read.isEmpty()) {
-                    result = read.get(Constantes.INDEX_0);
+                    result = read.get(Utilities.INDEX_0);
                 } else {
-                    throw new NotFoundException(Constantes.NOT_FOUND);
+                    throw new NotFoundException(Utilities.NOT_FOUND);
                 }
             } catch (SQLException e) {
                 log.error(e.getMessage(), e);
@@ -73,7 +73,7 @@ public class RestaurantTableDAOImpl implements RestaurantTableDAO {
             }
         } catch (SQLException e) {
             log.error(e.getMessage(), e);
-            throw new DataBaseDownException(Constantes.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
+            throw new DataBaseDownException(Utilities.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
         }
         return result;
     }
@@ -98,7 +98,7 @@ public class RestaurantTableDAOImpl implements RestaurantTableDAO {
             }
         } catch (SQLException e) {
             log.error(e.getMessage(), e);
-            throw new DataBaseDownException(Constantes.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
+            throw new DataBaseDownException(Utilities.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
         }
         return add;
     }
@@ -114,7 +114,7 @@ public class RestaurantTableDAOImpl implements RestaurantTableDAO {
 
                 result = preparedStatement.executeUpdate();
                 if (result != 1) {
-                    throw new NotFoundException(Constantes.NOT_FOUND);
+                    throw new NotFoundException(Utilities.NOT_FOUND);
                 }
 
             } catch (SQLException e) {
@@ -123,7 +123,7 @@ public class RestaurantTableDAOImpl implements RestaurantTableDAO {
             }
         } catch (SQLException e) {
             log.error(e.getMessage(), e);
-            throw new DataBaseDownException(Constantes.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
+            throw new DataBaseDownException(Utilities.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
         }
         return result;
     }
@@ -142,7 +142,7 @@ public class RestaurantTableDAOImpl implements RestaurantTableDAO {
                 result = preparedStatementTable.executeUpdate();
 
                 if (result != 1) {
-                    throw new NotFoundException(Constantes.NOT_FOUND);
+                    throw new NotFoundException(Utilities.NOT_FOUND);
                 }
                 connection.commit();
 
@@ -159,7 +159,7 @@ public class RestaurantTableDAOImpl implements RestaurantTableDAO {
             }
         } catch (SQLException e) {
             log.error(e.getMessage(), e);
-            throw new DataBaseDownException(Constantes.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
+            throw new DataBaseDownException(Utilities.NO_SE_HA_PODIDO_CONECTAR_A_LA_BASE_DE_DATOS);
         }
         return result;
     }

@@ -4,16 +4,12 @@ public class SqlQueries {
 
     private SqlQueries(){}
 
-
-
     //CUSTOMER
     public static final String TABLEGETALL = "SELECT * FROM table_restaurant";
     public static final String TABLEGET = "SELECT * FROM table_restaurant WHERE table_number = ?";
     public static final String TABLEUPDATE = "update table_restaurant set number_seats = ? where table_number = ?";
     public static final String TABLEADD = "INSERT INTO table_restaurant (number_seats) VALUES (?)";
     public static final String TABLEDELETE = "delete from table_restaurant where table_number = ?";
-
-
 
 
     //ORDER

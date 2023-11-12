@@ -22,12 +22,12 @@ public class RestaurantTableServices {
         return restaurantTableDAO.get(id);
     }
 
-    public int add(RestaurantTable restaurantTable) {
-        return restaurantTableDAO.add(restaurantTable);
+    public void add(RestaurantTable restaurantTable) {
+        restaurantTableDAO.add(restaurantTable);
     }
 
-    public int update(RestaurantTable restaurantTable) {
-        return restaurantTableDAO.update(restaurantTable);
+    public void update(RestaurantTable restaurantTable) {
+        restaurantTableDAO.update(restaurantTable);
     }
 
     public int delete(int id) {
